@@ -2,79 +2,82 @@
 const net = require('net');
 
 const serverName = "Server: RRRRRRRRRRRRRRRRR";
-const status = 'HTTP/1.1 200 OK';
+const status = '200 OK';
+const statusError = '404 Not Found';
+const contentType = 'text/html; charset=utf-8';
+const connection = 'keep-alive';
 
 const error404 = `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Element not found!</title>
-  <link rel="stylesheet" href="/css/styles.css">
+<meta charset="UTF-8">
+<title>Element not found!</title>
+<link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <h1>404</h1>
-  <h2>Element not found!</h2>
-  <p>
-    <a href="/">back</a>
-  </p>
+<h1>404</h1>
+<h2>Element not found!</h2>
+<p>
+<a href="/">back</a>
+</p>
 </body>
 </html>`;
 const helium = `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Elements - Helium</title>
-  <link rel="stylesheet" href="/css/styles.css">
+<meta charset="UTF-8">
+<title>The Elements - Helium</title>
+<link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <h1>Helium</h1>
-  <h2>H</h2>
-  <h3>Atomic number 2</h3>
-  <p>Helium is a chemical element with symbol He and atomic number 2. It is a colorless, odorless, tasteless, non-toxic, inert, monatomic gas that heads the noble gas group in the periodic table. Its boiling and melting points are the lowest among all the elements and it exists only as a gas except in extremely cold conditions.</p>
-  <p><a href="/">back</a></p>
+<h1>Helium</h1>
+<h2>H</h2>
+<h3>Atomic number 2</h3>
+<p>Helium is a chemical element with symbol He and atomic number 2. It is a colorless, odorless, tasteless, non-toxic, inert, monatomic gas that heads the noble gas group in the periodic table. Its boiling and melting points are the lowest among all the elements and it exists only as a gas except in extremely cold conditions.</p>
+<p><a href="/">back</a></p>
 </body>
 </html>`;
 const hydrogen = `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Elements - Hydrogen</title>
-  <link rel="stylesheet" href="/css/styles.css">
+<meta charset="UTF-8">
+<title>The Elements - Hydrogen</title>
+<link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <h1>Hydrogen</h1>
-  <h2>H</h2>
-  <h3>Atomic number 1</h3>
-  <p>Hydrogen is a chemical element with chemical symbol H and atomic number 1. With an atomic weight of 1.00794 u, hydrogen is the lightest element on the periodic table. Its monatomic form (H) is the most abundant chemical substance in the universe, constituting roughly 75% of all baryonic mass. Non-remnant stars are mainly composed of hydrogen in its plasma state. The most common isotope of hydrogen, termed protium (name rarely used, symbol 1H), has a single proton and zero neutrons.</p>
-  <p><a href="/">back</a></p>
+<h1>Hydrogen</h1>
+<h2>H</h2>
+<h3>Atomic number 1</h3>
+<p>Hydrogen is a chemical element with chemical symbol H and atomic number 1. With an atomic weight of 1.00794 u, hydrogen is the lightest element on the periodic table. Its monatomic form (H) is the most abundant chemical substance in the universe, constituting roughly 75% of all baryonic mass. Non-remnant stars are mainly composed of hydrogen in its plasma state. The most common isotope of hydrogen, termed protium (name rarely used, symbol 1H), has a single proton and zero neutrons.</p>
+<p><a href="/">back</a></p>
 </body>
 </html>`;
 const index = `<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>The Elements</title>
-  <link rel="stylesheet" href="/css/styles.css">
+<meta charset="UTF-8">
+<title>The Elements</title>
+<link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <h1>The Elements</h1>
-  <h2>These are all the known elements.</h2>
-  <h3>These are 2</h3>
-  <ol>
-    <li>
-      <a href="/hydrogen.html">Hydrogen</a>
-    </li>
-    <li>
-      <a href="/helium.html">Helium</a>
-    </li>
-  </ol>
+<h1>The Elements</h1>
+<h2>These are all the known elements.</h2>
+<h3>These are 2</h3>
+<ol>
+<li>
+<a href="/hydrogen.html">Hydrogen</a>
+</li>
+<li>
+<a href="/helium.html">Helium</a>
+</li>
+</ol>
 </body>
 </html>`;
 const styles = `@import url(http://fonts.googleapis.com/css?family=Open+Sans|Roboto+Slab);
 
 /* http://meyerweb.com/eric/tools/css/reset/
-   v2.0 | 20110126
-   License: none (public domain)
+v2.0 | 20110126
+License: none (public domain)
 */
 
 html, body, div, span, applet, object, iframe,
@@ -181,13 +184,98 @@ a:hover{
   border-bottom: 1px dashed #C6C5AC;
 }`;
 
+
+function currentDate() {
+  return new Date().toUTCString();
+}
+
 const server = net.createServer((socket) => {
   socket.on('data', (data) => {
-    process.stdout.write(data);
-    socket.write(status + '\n' +'date: ' + new Date().toUTCString() + '\n' + serverName + '\n\n <html> test </html>');
-    socket.end();
+    let reqString = data.toString().split('\r\n');
+    let req = reqString[0].toString().split(' ');
+    let reqMethod = req[0];
+    let reqURI = req[1];
+    let reqProtocal = req[2];
+
+    function dashind() {
+      socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + index.length + '\n' + connection + '\n\n' + index + '\n');
+      socket.end();
+    }
+
+    function helihtml() {
+      socket.write(reqProtocal + " " + status +  '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + helium.length + '\n' + connection + '\n\n' + helium + '\n');
+      socket.end();
+    }
+
+    function hydrohtml() {
+      socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + hydrogen.length + '\n' + connection + '\n\n' + hydrogen + '\n');
+      socket.end();
+    }
+
+    function stycss() {
+      socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + styles.length + '\n' + connection + '\n\n' + styles + '\n');
+      socket.end();
+    }
+
+    function errfour() {
+      socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + error404.length + '\n' + connection + '\n\n' + error404 + '\n');
+      socket.end();
+    }
+
+    if(reqMethod === "GET"){
+      switch(reqURI){
+        case("/"):
+        dashind();
+        break;
+        case('/index.html'):
+        dashind();
+        break;
+        case('/helium.html'):
+        helihtml();
+        break;
+        case('/hydrogen.html'):
+        hydrohtml();
+        break;
+        case('/css/styles.css'):
+        stycss();
+        break;
+        case('/404.html'):
+        errfour();
+        break;
+        default:
+        errfour();
+        break;
+      }
+
+    }else if(reqMethod === "HEAD") {
+      switch(reqURI){
+        case("/"):
+        socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + index.length + '\n' + connection + '\n');
+        break;
+        case('/index.html'):
+        socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + index.length + '\n' + connection + '\n');
+        break;
+        case('/helium.html'):
+        socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + helium.length + '\n' + connection + '\n');
+        break;
+        case('/hydrogen.html'):
+        socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + hydrogen.length + '\n' + connection + '\n');
+        break;
+        case('/css/styles.css'):
+        socket.write(reqProtocal + " " + status + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + styles.length + '\n' + connection + '\n');
+        break;
+        case('/404.html'):
+        socket.write(reqProtocal + " " + statusError + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + error404.length + '\n' + connection + '\n');
+        break;
+        default:
+        socket.write(reqProtocal + " " + statusError + '\n' + serverName + '\n' + currentDate() + '\n' + contentType + '\n' + error404.length + '\n' + connection + '\n');
+        break;
+      }
+      socket.end();
+    }
   });
 });
 
 server.listen(8080, '0.0.0.0', () => {
+  console.log('connecting');
 });
